@@ -37,6 +37,14 @@ def main():
             for i, corner in enumerate(corners):
                 print(ids[i])
                 rvec, tvec, _objPoints = aruco.estimatePoseSingleMarkers(corner, 0.05, cameraMatrix, distCoeffs)
+                print(corner[0])
+
+                aruco.drawAxis(frame, cameraMatrix, distCoeffs, rvec, tvec, 0.1)
+
+                # 検出矩形の画面上における中心座標を算出
+                centerCornerX = int(corner[0][0][0] + (corner[0][2][0] - corner[0][0][0])/2)
+                centerCornerY = int(corner[0][0][1] + (corner[0][2][1] - corner[0][0][1])/2)
+
                 tvec = tvec.flatten()
                 rvec = rvec.flatten()
                 rvecMatrix = cv2.Rodrigues(rvec)
@@ -46,15 +54,21 @@ def main():
                 projectionMatrix = np.hstack((rvecMatrix, transposeTvec))
                 eulerAngle = cv2.decomposeProjectionMatrix(projectionMatrix)[6]
 
-                if ids[i].flatten() == 0:
-                    print("x:", tvec[0])
-                    print("y:", tvec[1])
-                    print("z:", tvec[2])
-                    print("roll:", eulerAngle[0])
-                    print("pitch:", eulerAngle[1])
-                    print("yaw:", eulerAngle[2])
+                if ids[i] == 0:
+                    cv2.putText(frame, str(int(eulerAngle[2][0]))+ '/deg', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
                 
-                aruco.drawAxis(frame, cameraMatrix, distCoeffs, rvec, tvec, 0.1)
+                if ids[i] == 1:
+                    cv2.putText(frame, str(int(tvec[1] * 1000))+ '/mm', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+
+
+                # if ids[i].flatten() == 0:
+                #     print("x:", tvec[0])
+                #     print("y:", tvec[1])
+                #     print("z:", tvec[2])
+                #     print("roll:", eulerAngle[0])
+                #     print("pitch:", eulerAngle[1])
+                #     print("yaw:", eulerAngle[2])
+                
             
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
