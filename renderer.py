@@ -1,6 +1,7 @@
 import cv2
 from cv2 import aruco
 import numpy as np
+import os
 
 # webcam parameters
 # cameraMatrix = np.array([[962.27928045, 0., 390.31456086],
@@ -26,6 +27,7 @@ def main():
     dictAruco = aruco.Dictionary_get(aruco.DICT_4X4_50)
     parameters = aruco.DetectorParameters_create()
 
+    volume = 0
 
     while True:
         ret, frame = cap.read()
@@ -35,9 +37,7 @@ def main():
         if ids is not None:
             aruco.drawDetectedMarkers(frame, corners, ids)
             for i, corner in enumerate(corners):
-                print(ids[i])
                 rvec, tvec, _objPoints = aruco.estimatePoseSingleMarkers(corner, 0.05, cameraMatrix, distCoeffs)
-                print(corner[0])
 
                 aruco.drawAxis(frame, cameraMatrix, distCoeffs, rvec, tvec, 0.1)
 
@@ -56,9 +56,20 @@ def main():
 
                 if ids[i] == 0:
                     cv2.putText(frame, str(int(eulerAngle[2][0]))+ '/deg', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                    tempVolume = abs(int(eulerAngle[2][0]/180 * 120))
+                    if tempVolume != volume:
+                        volume = tempVolume
+                        os.system('pactl set-sink-volume 4 ' + str(volume) + '%')
+                        print('pactl set-sink-volume 4 ' + str(volume) + '%')
+                        
                 
                 if ids[i] == 1:
                     cv2.putText(frame, str(int(tvec[1] * 1000))+ '/mm', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                    tempVolume = abs(int(tvec[1] * 1000))
+                    if tempVolume != volume:
+                        volume = tempVolume
+                        os.system('pactl set-sink-volume 4 ' + str(volume) + '%')
+                        print('pactl set-sink-volume 4 ' + str(volume) + '%')
 
 
                 # if ids[i].flatten() == 0:
