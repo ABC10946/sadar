@@ -11,13 +11,14 @@ import numpy as np
 
 # pixel 5a back camera parameters
 cameraMatrix = np.array(
-    [[508.08563138,   0.  ,       317.93414728],
- [  0.        , 510.02650753, 240.67870614],
- [  0.        ,   0.      ,     1.        ]]
+    [[508.08563138,   0.,       317.93414728],
+     [0., 510.02650753, 240.67870614],
+     [0.,   0.,     1.]]
 )
 
 
-distCoeffs = np.array([ 0.16271226, -0.95617855, -0.00379688,  0.00348429,  2.12451617])
+distCoeffs = np.array(
+    [0.16271226, -0.95617855, -0.00379688,  0.00348429,  2.12451617])
 
 
 def main():
@@ -26,24 +27,28 @@ def main():
     dictAruco = aruco.Dictionary_get(aruco.DICT_4X4_50)
     parameters = aruco.DetectorParameters_create()
 
-
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, dictAruco, parameters=parameters)
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(
+            gray, dictAruco, parameters=parameters)
 
         if ids is not None:
             aruco.drawDetectedMarkers(frame, corners, ids)
             for i, corner in enumerate(corners):
                 print(ids[i])
-                rvec, tvec, _objPoints = aruco.estimatePoseSingleMarkers(corner, 0.05, cameraMatrix, distCoeffs)
+                rvec, tvec, _objPoints = aruco.estimatePoseSingleMarkers(
+                    corner, 0.05, cameraMatrix, distCoeffs)
                 print(corner[0])
 
-                aruco.drawAxis(frame, cameraMatrix, distCoeffs, rvec, tvec, 0.1)
+                aruco.drawAxis(frame, cameraMatrix,
+                               distCoeffs, rvec, tvec, 0.1)
 
                 # 検出矩形の画面上における中心座標を算出
-                centerCornerX = int(corner[0][0][0] + (corner[0][2][0] - corner[0][0][0])/2)
-                centerCornerY = int(corner[0][0][1] + (corner[0][2][1] - corner[0][0][1])/2)
+                centerCornerX = int(
+                    corner[0][0][0] + (corner[0][2][0] - corner[0][0][0])/2)
+                centerCornerY = int(
+                    corner[0][0][1] + (corner[0][2][1] - corner[0][0][1])/2)
 
                 tvec = tvec.flatten()
                 rvec = rvec.flatten()
@@ -55,11 +60,17 @@ def main():
                 eulerAngle = cv2.decomposeProjectionMatrix(projectionMatrix)[6]
 
                 if ids[i] == 0:
-                    cv2.putText(frame, str(int(eulerAngle[2][0]))+ '/deg', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-                
-                if ids[i] == 1:
-                    cv2.putText(frame, str(int(tvec[1] * 1000))+ '/mm', (centerCornerX, centerCornerY), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                    cv2.putText(frame,
+                                str(int(eulerAngle[2][0])) + '/deg',
+                                (centerCornerX, centerCornerY),
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
+                if ids[i] == 1:
+                    cv2.putText(frame,
+                                str(int(tvec[1] * 1000)) + '/mm',
+                                (centerCornerX,
+                                 centerCornerY),
+                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
                 # if ids[i].flatten() == 0:
                 #     print("x:", tvec[0])
@@ -68,12 +79,11 @@ def main():
                 #     print("roll:", eulerAngle[0])
                 #     print("pitch:", eulerAngle[1])
                 #     print("yaw:", eulerAngle[2])
-                
-            
+
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
- 
+
     cap.release()
     cv2.destroyAllWindows()
 

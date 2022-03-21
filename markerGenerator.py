@@ -16,7 +16,7 @@ for count in range(numMark):
         imgNameMark = 'mark_id_0' + str(count) + '.png'
     else:
         imgNameMark = 'mark_id_' + str(count) + '.png'
-    
+
     pathMark = os.path.join(markDir, imgNameMark)
     print(pathMark)
 
